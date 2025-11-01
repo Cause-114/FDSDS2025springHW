@@ -1,0 +1,230 @@
+\documentclass[11pt]{article}
+
+\usepackage{listings}
+\usepackage{epsfig}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{color}
+\usepackage{placeins}
+\usepackage{url}
+\usepackage{cases}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{extramarks}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{ctex}
+\usepackage{algpseudocode}
+\usepackage{algorithm,algorithmicx,caption}
+\usepackage{booktabs}
+
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\marginparwidth 10pt
+\marginparsep 10pt
+\topmargin -20pt
+\textwidth 6.5in
+\textheight 8.5in
+\parindent = 20pt
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\minimax}{minimax}
+
+\renewcommand{\algorithmicrequire}{ \textbf{function:}}
+\renewcommand{\algorithmicreturn}{ \textbf{end function}}
+\newcommand{\blue}[1]{\begin{color}{blue}#1\end{color}}
+\newcommand{\magenta}[1]{\begin{color}{magenta}#1\end{color}}
+\newcommand{\red}[1]{\begin{color}{red}#1\end{color}}
+\newcommand{\green}[1]{\begin{color}{green}#1\end{color}}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+%\newenvironment{proof}{{\noindent\it Proof}\quad}{\hfill $\square$\par}
+
+%\usepackage{sidecap}
+\newcommand{\enterProblemHeader}[1]{
+	\nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\stepcounter{#1}
+	\nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+	\ifnum#1>0
+	\setcounter{homeworkProblemCounter}{#1}
+	\fi
+	\section{Problem \arabic{homeworkProblemCounter}}
+	\setcounter{partCounter}{1}
+	\enterProblemHeader{homeworkProblemCounter}
+}{
+	\exitProblemHeader{homeworkProblemCounter}
+}
+
+\begin{document}
+	
+	\title{\bf Homework 5}
+	
+	\author{ 陈远洋 \quad 23307130322}
+	
+	
+	\date{\today}
+	\maketitle
+	
+	%问题一	 
+	\begin{homeworkProblem}		
+		Consider the smoothed LASSO (Least Absolute Shrinkage and Selection Operator) problem: 
+		$$
+		\min_x \frac{1}{2}\|Ax-b\|_2^2 + \mu L_{\sigma}(x),
+		$$
+		where $x\in\mathbb{R}^n, A\in\mathbb{R}^{m\times n}$, $b\in\mathbb{R}^m$, $\mu$ is the regularization parameter. $L_{\sigma}(x)$ is defined as
+		$$
+		L_{\sigma}(x) = \sum_{i=1}^{n}l_{\sigma}(x_i),
+		$$
+		$$
+		l_{\sigma}(x_i) = \left\{
+		\begin{aligned}
+		& \frac{1}{2\sigma}x_i^2, \ |x_i|<\sigma, \\
+		& |x_i|-\frac{\sigma}{2}, \ \text{otherwise}.
+		\end{aligned}
+		\right.
+		$$
+		
+		Let $\sigma=0.5$ and $\mu=1$. Please use the Newton method to numerically solve above problem with $A$ and $b$ provided in homework 3, where $m=512, n=1024$. Then write a report to illustrate the method you used and present your experiment results. \\
+		
+		Note: 
+		\begin{itemize}
+			\item To ensure the Hessian matrix is non-singular, you can add a scaled identity matrix (e.g. $1\times 10^{-8}I_n$) to the original matrix.
+			\item Please write your method as an independent function in your code.
+		\end{itemize}
+		
+	\end{homeworkProblem}
+	
+    \section{Solution}
+    \subsection{解存在性分析}
+    首先，该问题一定是有解的。类似于上一次的作业，我们只讨论$x\in A$的零空间的正交补情况（其他情况可以转化）。
+    记$t^2=min_{\|x\|_2=1}\|Ax-b\|_2^2$，则有当$\|x\|_2\geq \dfrac{2\|b\|_2+1}{t}$时。
+    由于$\dfrac{\|x_i\|_2^2}{2\sigma}-\|x_i\|_2+\dfrac{\sigma}{2}=\dfrac{1}{2\sigma}(\|x_i\|_2-\sigma)^2\geq0$。
+    且$\|Ax-b\|_2\geq\|Ax\|_2-\|b\|_2\geq t\|x\|_2-\|b\|_2\geq0$，此时有：原式$\geq\dfrac{1}{2}(\|x\|_2t-\|b\|_2)^2+\mu(\sum_{i=1}^{n}|x_i|-\dfrac{n\sigma}{2})$
+    $\geq\dfrac{1}{2}t^2\|x\|_2^2+(-2tb+\mu)\|x\|_2+O(1)$.这是一个关于$\|x\|_2$的二次函数，可知在$\|x\|_2\rightarrow \infty$时，原式一定也区域无穷。
+    又由于在$\|x_i\|_2=\sigma$处，两个分段函数均趋近于$\dfrac{\sigma}{2}$，故原式在小范围内连续。
+    所以原式一定有全局最优解。
+    \subsection{代码构成分析}
+    牛顿法求解优化问题的几个步骤：
+    \begin{algorithm}[!htb]\label{alg1}
+    \caption{Newton method(LM)}
+    \begin{algorithmic}[1]
+    \State Input $f$,$x_0$,$tolerance$,
+    \State $k\leftarrow 0$
+    \While {$\nabla f(x_k)\geq tolerance$}
+    \State let the descent direction $p_k$ be $-(\nabla^2 f(x_k)+\lambda I)^{-1}\nabla f(x_k)$.
+    \State pick a step size $\alpha_k$ (intially may not be 1, finally always 1).
+    \State update $x_k$ : $x_{k+1}\leftarrow x_k+\alpha_kp_k$.
+    \State $k\leftarrow k+1$;
+    \EndWhile
+    \end{algorithmic}
+    \end{algorithm}
+
+    其中目标函数为LASSO，在我的代码中实现在最后，名字为：$res=lasso(A,b,\sigma,\mu,x)$
+    对应的梯度函数为$dfres=dflasso(A,b,\sigma,\mu,x)$。由于问题关心的最优解是$x$，所以我在代码文件的最
+    前面将目标函数与梯度函数定义为$f$,$df$两个关于$x$单一变量的函数句柄（带入了预设值得参数值，可以改变）。
+
+    而下降方向的选择上，采用牛顿法对应的方向。即$-(\nabla^2 f(x_k)+\lambda I)^{-1}\nabla f(x_k)$。其中
+    由于该问题对应的Hessian阵$A^TA+diag(0\,or\,\dfrac{\mu}{\sigma})$可能奇异，所以加上正则项$\lambda I$
+    使得矩阵非奇异。对$\lambda$的选择，既不能太大，也不能太小。过大会导致下降方向与牛顿方向偏差过大，使下降效果变差。
+    而$\lambda$过小则会使矩阵接近奇异。对此我的试验中$\lambda\in[10^{-10},10^{-4}]$的效果较好。我的代码以
+    $10^{-6}$为例。这部分对应逻辑在$d = direction(df, x, A, sig, miu)$函数。 
+
+    对于线搜索上，采用armijo方法要求每步至少下降一点，即$f(x+\alpha d)\leq f(x)+c_1\alpha\nabla f(x)^Td$。
+    我们知道$\nabla f(x_k)^Td=-\nabla f(x_k)^TH\nabla f(x_k)<0$。H是加上正则项后的Hessian阵的逆，正定。所以
+    该方向一定能够在小范围内下降。
+    原始代码\hyperref[cd1]{如下：}
+
+    其中在参数选择上，初始步长$a0=1$，下降斜率$c1=0.1$，后退步长$beta=0.6$。但是参数设置其实对结果影响不大。
+    最终在$5\sim6$步之内，结果已经收敛，并且每步步长为1时都能过关。所以只要将$c1$设置得足够小即可。
+    \label{cd1}
+    \begin{lstlisting}[language=Matlab,frame=single,numbers=left]
+    function a0 = armijo(f, df, d, x, a0, c1, beta)
+        f0 = f(x); df0 = dot(df(x), d);
+        fx = f(x + a0 * d);
+        while (fx > f0 + c1 * a0 * df0)
+            a0 = a0 * beta; fx = f(x + a0 * d);
+        end
+    end
+    \end{lstlisting}
+
+    整体上，将线搜索、方向选择函数实现封装为$ls$与$dir$句柄，供主函数调用。
+    通过改变句柄对应的函数可以更换线搜索以及方向选择方法。设置梯度精度要求以及最大迭代次数用作停机条件。
+    整个主函数$NewtonChen$的实现逻辑与\hyperref[alg1]{算法一}一致。
+
+    首先，主函数被传入参数最大迭代次数与梯度精度要求。我们导入数据$A,b$并设置参数$\sigma=0.5,\mu=1$。
+    并设置初始值解$x_0=\vec{0}$。根据需求，设置线搜索方法参数为上述值以及
+    将数据导入方向选择方法（更改$ls,dir$句柄即可）。最后进入\hyperref[alg1]{算法一}所描述的流程。
+
+\subsection{实验结果}
+	本实验中，最终收敛效率是令人满意的，在几步之内精度陡然增加。6步之内梯度值已经来到$3.9975\times 10^{-12}$级别。
+    每一步进行后的梯度值如\hyperref[tab1]{下表}所示：但之后的步长已然变为可忽略的小量，即之后的点列并没有改变。所以我们认为
+    此时精度在$10^{-10}$级别已经收敛，如果将要求再拉高无法继续进行。但应该可以通过改变Hessian阵$H$的正则化项系数来调节。
+    \begin{table}[!htb]
+        \label{tab1}
+        \centering
+        \caption{迭代过程中的梯度值}
+        \begin{tabular}{c|c}\hline
+            迭代次数 & 梯度模长 \\ \hline
+            1&$4.5860\times 10^{0}$ \\\hline
+            2&$2.0880\times 10^{0}$ \\\hline
+            3&$2.7100\times 10^{-2}$ \\\hline
+            4&$1.0005\times 10^{-8}$ \\\hline
+            5&$3.9975\times 10^{-12}$ \\\hline
+        \end{tabular}
+    \end{table}  
+
+    在迭代终点处，函数值约为$50.701564$。每步迭代后函数值减去最小值取对数的图像以及步长的变化如下图所示：
+    明显看到每步步长恰能取到1，完全为Newton法的步长。并且函数光滑，局部二次收敛。
+
+    最终结果$x0$放在$x0.mat$文件里面。
+
+    \begin{minipage}[!htb]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{fvalueLoss.jpg}
+        \captionof{figure}{函数值收敛历史}
+    \end{minipage}\hfill
+    \begin{minipage}[!htb]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{alpha.jpg}
+        \captionof{figure}{步长变化}
+    \end{minipage}
+    
+    在$test.m$文件中我将我自己实现的Newton方法（NewtonChen）与上次作业的最速下降法（SteepestDescent）进行了比较。
+    可以发现Newton 法收敛远远快于最速下降法，而且精度远远高于最速下降法。
+    运行结果如下：
+	\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=0.5\textwidth]{result_comp.png}
+        \caption{Newton 法与最速下降法的比较}
+    \end{figure}
+\end{document}

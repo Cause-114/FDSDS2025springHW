@@ -1,0 +1,214 @@
+\documentclass[11pt]{article}
+
+\usepackage{listings}
+\usepackage{epsfig}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{amsmath,amssymb,amsthm,extarrows}
+\usepackage{color}
+\usepackage{placeins}
+\usepackage{url}
+\usepackage{cases}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{extramarks}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{ctex}
+\usepackage{algpseudocode}
+
+
+\usepackage{booktabs}
+
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\marginparwidth 10pt
+\marginparsep 10pt
+\topmargin -20pt
+\textwidth 6.5in
+\textheight 8.5in
+\parindent = 20pt
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\minimax}{minimax}
+
+\renewcommand{\algorithmicrequire}{ \textbf{function:}}
+\renewcommand{\algorithmicreturn}{ \textbf{end function}}
+\newcommand{\blue}[1]{\begin{color}{blue}#1\end{color}}
+\newcommand{\magenta}[1]{\begin{color}{magenta}#1\end{color}}
+\newcommand{\red}[1]{\begin{color}{red}#1\end{color}}
+\newcommand{\green}[1]{\begin{color}{green}#1\end{color}}
+\newcommand{\ud}{\mathop{}\negthinspace\mathrm{d}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+%\newenvironment{proof}{{\noindent\it Proof}\quad}{\hfill $\square$\par}
+
+%\usepackage{sidecap}
+\newcommand{\enterProblemHeader}[1]{
+	\nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\stepcounter{#1}
+	\nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+	\ifnum#1>0
+	\setcounter{homeworkProblemCounter}{#1}
+	\fi
+	\section{Problem \arabic{homeworkProblemCounter}}
+	\setcounter{partCounter}{1}
+	\enterProblemHeader{homeworkProblemCounter}
+}{
+	\exitProblemHeader{homeworkProblemCounter}
+}
+
+\begin{document}
+	
+	\title{\bf Homework 4}
+	
+	\author{ 陈远洋 
+	}
+	
+	
+	\date{}
+	\maketitle
+		
+	%问题一
+	\begin{homeworkProblem}		
+		Consider the function $f:\mathbb{R}^n \longmapsto \mathbb{R}$ given by 
+		\begin{equation*}
+			f(x) = \|x\|^{3/2},
+		\end{equation*}
+		and the method of steepest descent with a constant stepsize. Show that for this function, the Lipschitz condition $\|f(x)-f(y)\|\leq L\|x-y\|$ all $x$ and $y$ is not satisfied for any $L$. Furthermore, for any value of constant stepsize, the method either converges in a finite number of iterations to the minimizing point $x^*=0$ or else it does not converge to $x^*$.
+	\end{homeworkProblem}
+	\begin{proof}
+        题目实际包含两个命题的证明：
+        \begin{itemize}
+            \item （1） 不存在$L$，使得对任意的$x,y\in \mathbb{R}^n$,$\|f(x)-f(y)\|\leq L\|x-y\|$。
+            \item （2） 对于任意固定步长$\alpha$，要么在有限步内点列收敛至$\vec{0}$,要么点列不会收敛至$\vec{0}$。
+        \end{itemize}
+
+        我们首先来看（1）。容易知道$\nabla f(x)=\dfrac{\ud f(x)}{\ud \|x\|} \nabla \|x\|(x)=\dfrac{1.5}{\sqrt{\|x\|}}x$。
+        令$\Delta x=y-x$,则有$f(y)=f(x)+\nabla f(x)^T\Delta x+ o(\|\Delta x\|)$。可知：
+        \begin{align*}
+            \|f(y)-f(x)\|&=\|1.5\sqrt{\|x\|}\dfrac{x^T\Delta x}{\|x\|}+o(\|\Delta x\|)\|\\
+            &\geq 1.5\sqrt{\|x\|}\|\Delta x\|\dfrac{<x,\Delta x>}{\|x\|\|\Delta x\|}-o(\|\Delta x\|)\\
+        \end{align*}
+        故有：$\dfrac{\|f(y)-f(x)\|}{\|y-x\|}\geq 1.5\sqrt{\|x\|}\cos {\theta}-o(1)$， 其中$\theta$是$x$和$\Delta x$之间的夹角。
+        即$\forall x\,,\forall \epsilon>0,\exists t>0$当$\|\Delta x\|\leq t$时$\dfrac{\|f(y)-f(x)\|}{\|y-x\|}\geq 1.5\sqrt{\|x\|}
+        \cos {\theta}-\epsilon$，进一步，$\forall M>0$取$\|x\|>\dfrac{4}{9}M^2\,,\Delta x=tx$此时$\dfrac{\|f(y)-f(x)\|}{\|y-x\|}\geq M-\epsilon$.
+        若存在题设的$L$，取$M>L+\epsilon$即可导出矛盾！故（1）成立！
+
+        再来看（2）：由（1）的推导过程$x_{k+1}=x_k-\dfrac{1.5\alpha}{\sqrt{\|x_k\|}}x_k$。所以序列$\{x^k\}$共线
+        ,令$t_k=\|x_k\|$,有$t_{k+1}=|t_k-c\sqrt{t_k}|=h(t_k)$其中$c=1.5\alpha$。
+        可以看到当$\alpha\geq 0$时，$\{t_k$\}是单调递增的永不收敛至0.故我们只需考虑$\alpha<0$的情况。
+        考虑迭代的第$i$步，若此时未停止迭代（$h(t_i)\neq 0$，否则已经在有限步内收敛至0），作以下分类讨论：
+        \begin{itemize}
+            \item $t_i>c^2$。由于在$t_i>c^2$时有：$t_{i+1}=t_i-c\sqrt{t_i}<t_i-c^2$。取$j=\lceil \dfrac{t_i-c^2}{c^2}\rceil$，
+            容易知道在j步之内，必有$k<i+j$,使得$t_k\in [0,c^2]$。当$t_k=0\,or\,t_k=c^2$时，$h(t_k)=0$， 
+            此时已经收敛至0。（即有限步内收敛）。否则转步第二种情况。
+            \item $t_i\in (0,c^2)$。容易得到在$(0,c^2)$内，$h(t)\leq h(\dfrac{c^2}{4})=\dfrac{c^2}{4}$. 故对以后的每一步，
+            $h(t_m)\leq\dfrac{c^2}{4}$.则由迭代格式$\forall m>i+1\,,\dfrac{\sqrt{t_{m+1}}-\dfrac{c}{2}}{\sqrt{t_m}-\dfrac{c}{2}}=
+            \dfrac{-\sqrt{t_m}+\dfrac{c}{2}}{\sqrt{t_{m+1}}+\dfrac{c}{2}}<1$，可知此后$\{t^k\}$开始递增，且以$\dfrac{c^2}{4}$为上界
+            。故有$\dfrac{\sqrt{t_{m+1}}-\dfrac{c}{2}}{\sqrt{t_m}-\dfrac{c}{2}}\leq \dfrac{\dfrac{c}{2}-\sqrt{t_{i+1}}}{\dfrac{c}{2}+\sqrt{t_{i+1}}}$。
+            可知序列$\{t^k\}$至少线性收敛至$\dfrac{c^2}{4}$，对应$\{x^k\}$最后趋近于在$\dfrac{c^2}{4}\dfrac{x_0}{\|x_0\|}$与
+            $-\dfrac{c^2}{4}\dfrac{x_0}{\|x_0\|}$之间正负横跳。不收敛至0.
+        \end{itemize}
+        综上所述，（2）成立！
+    \end{proof}
+
+	%问题二
+    \begin{homeworkProblem}		
+		Let $f(x)=\frac{1}{2}x^TQx$, where $Q$ is symmetric, invertible, and has at least one negative eigenvalue. Consider the steepest descent method with constant stepsize and show that unless the starting	point $x^0$ belongs to the subspace spanned by the eigenvectors of $Q$ corresponding to the non-negative eigenvalues, the generated sequence $\{x^k\}$ diverges.
+	\end{homeworkProblem}
+    \begin{proof}
+        容易知道$\nabla f(x)=Qx$，令$x_k=\sum_{i=1}^n\beta_{i,k} y_i$，其中$y_1\cdots y_n$ 是$Q$的互相正交的单位特征向量，
+        对应特征值$\lambda_1\leq\cdots\leq\lambda_i<0<\cdots\leq\lambda_n$。设固定的步长为$\alpha$.
+        则有：$x_{k+1}=x_k-\alpha Qx_k\Rightarrow \beta_{s,k+1}=(1-\alpha\lambda_s)\beta_{s,k}$。
+        若$\exists s\leq i$,且$\beta_{s,0}\neq 0$此时：
+        \begin{itemize}
+            \item $\alpha>0$ 由上面推导过程$\beta_{s,n}=(1-\alpha\lambda_s)^n\beta_{s,0}$，且$1-\alpha\lambda_s>1$。
+            故$\lim_{n\to\infty}\|x_n\|^2\geq\lim_{n\to\infty}|\beta_{s,n}|^2=
+            \lim_{n\to\infty}(1-\alpha\lambda_s)^n|\beta_{s,0}|^2=\infty$。序列发散！
+            \item $\alpha<0$ 若存在$\exists \bar{s}>i$,且$\beta_{\bar{s},0}\neq 0$，则情况类似于上述过程，一定发散！
+            否则$x_0$落在$Q$的负特征空间。而$x_k^TQx_k=\sum_{j=1}^i \lambda_j \beta_{j,k}^2$。
+            如果$\forall j<i$且$\beta_{j,0}\neq0$有：$1-\alpha\lambda_j\geq-1$（否则类似于上面的情况，必然发散），此时
+            $|\beta_{j,k}|$是关于$k$线性衰减的（当全部的$1-\alpha\lambda_j=-1$时函数值不变），所以此时函数值不会下降，不符合函数值下降的要求，不成立！
+            \item $\alpha=0$ 此时相当于$x_k$没变（$x_k=x_0$），无意义！
+        \end{itemize}
+        综上所述，当$x_0\notin \text{span}\{y_{i+1},\cdots,y_n\}$时，$\{x^k\}$必然发散！
+	\end{proof}
+	
+	%问题三
+	\begin{homeworkProblem}		
+		Consider the steepest descent method $x^{k+1} = x^k - \alpha^k\left(\nabla f(x^k)+e^k\right)$, where $e^k$ is an error satisfying $\|e^k\|\leq\delta$ for all $k$. Assume that $\nabla f$ is Lipschitz continuous. Show that for any $\delta^\prime>\delta$, there exists a range of positive stepsizes $\left[\underline{\alpha}, \bar{\alpha}\right]$ such that if $\alpha^k\in\left[\underline{\alpha}, \bar{\alpha}\right]$ for all sufficiently large $k$, then either $f(x^k)\to-\infty$ or $\|\nabla f(x^k)\| < \delta^\prime$ for infinitely many values of $k$. (Hint: Using the reasoning of Prop.1.2.2 in the \textit{Nonlinear Programming} textbook.)
+	\end{homeworkProblem}
+	\begin{proof}
+        先证几个辅助命题：\\
+        \begin{itemize}
+            \item（1）若$\|\nabla f(x_k)\|\geq\delta^\prime$，且$\|e_k\|\leq\delta$，则有：
+            $(\nabla f(x_k)+e_k)^T\nabla f(x_k)=\|\nabla f(x_k)\|^2+e_k^T\nabla f(x_k)\geq\|\nabla f(x_k)\|^2-\|\nabla f(x_k)\|\|e_k\|$。
+            最右端表达式在$\|\nabla f(x_k)\|>\|e_k\|$时单调递增，所右端项在$\|\nabla f(x_k)\|=\delta^\prime$时取得最小值。同时表达式
+            关于$\|e_k\|$单调递减，故在$\|e_k\|=\delta$取得最小值。
+            故$(\nabla f(x_k)+e_k)^T\nabla f(x_k)\geq \delta^\prime(\delta^\prime-\delta)>0$。
+            \item（2） 若$\|\nabla f(x_k)\|\geq\delta^\prime$，且$\|e_k\|\leq\delta$，并令$\theta $为$\nabla f(x_k)$与$e_k$夹角。则有：\begin{align*}
+                &\dfrac{(\nabla f(x_k)+e_k)^T\nabla f(x_k)}{\|\nabla f(x_k)+e_k\|^2}= 
+                \dfrac{\|\nabla f(x_k)\|^2+\|\nabla f(x_k)\|\|e_k\|\cos{\theta}}{\|\nabla f(x_k)\|^2+\|e_k\|^2+2\|\nabla f(x_k)\|\|e_k\|\cos{\theta}}
+                \\&\xlongequal{t=\|\nabla f(x_k)\|(\|\nabla f(x_k)\|+\|e_k\|\cos{\theta})}\dfrac{1}{2+\dfrac{\|e_k\|^2-\|\nabla f(x_k)\|^2}{t}}=g(t)
+            \end{align*}
+            显然$g(t)$关于$t$单调递减。所以固定梯度与误差的模长时$g(t)$在$\cos{\theta}=1$时取得最小值$\dfrac{\|\nabla f(x_k)\|}{\|\nabla f(x_k)\|+\|e_k\|}=h(\|e_k\|,\|\nabla f(x_k)\|)$。
+            又显然$h(\|e_k\|,\|\nabla f(x_k)\|)$关于$\|e_k\|$单调递减，关于$\|\nabla f(x_k)\|$单调递增。故有$h(\|e_k\|,\|\nabla f(x_k)\|)\geq\dfrac{\delta^\prime}{\delta^\prime+\delta}$
+            。即$\dfrac{(\nabla f(x_k)+e_k)^T \nabla f(x_k)}{\|\nabla f(x_k)+e_k\|^2}\geq\dfrac{\delta^\prime}{\delta^\prime+\delta}$。
+            \item（3） 若有$x_{k+1}=x_k+\alpha d$且$\nabla f$是Lipschitz连续的，则有：\begin{align*}
+                f(x_{k+1})-f(x_k)&=\int_{0}^{\alpha} d^T\nabla f(x_k+t d) \ud t\\
+                &=\int_{0}^{\alpha} d^T\nabla f(x_k)+d^T(\nabla f(x_k+t d)-\nabla f(x_k)) \ud t\\
+                &\leq\alpha d^T\nabla f(x_k)+\int_{0}^{\alpha} tL\|d\|^2 \ud t\\
+                &=\alpha d^T\nabla f(x_k)+\dfrac{\alpha^2L}{2} \|d\|^2
+            \end{align*}
+        \end{itemize}
+        下面开始证明。采用反证法。取足够小的$\epsilon>0$，使得$0<\underline{\alpha}=\epsilon<\dfrac{(2-\epsilon)\delta^\prime}{L(\delta+\delta^\prime)}
+        =\bar{\alpha}$。若对于所有足够大的$k$，$\alpha^k\in\left[\underline{\alpha}, \bar{\alpha}\right]$，
+        并且不满足题设条件。即此时只有有限多个$k$满足$\|\nabla f(x^k)\|<\delta^\prime$（可以推出有无限多个大于等于）并且${f(x^k)}$并不趋于负无穷。
+        对于每一个足够大，满足$\nabla f(x_k)\geq\delta^\prime$且$\alpha^k\in\left[\underline{\alpha}, \bar{\alpha}\right]$的$k$
+        则有：\begin{align*}
+            f(x_{k+1})-f(x_k)&\leq -\alpha_k (\nabla f(x_k)+e_k)^T\nabla f(x_k)+\dfrac{\alpha_k^2L}{2} \|\nabla f(x_k)+e_k\|^2\\
+            &\leq \alpha_k(\bar{\alpha}\dfrac{L\|\nabla f(x_k)+e_k\|^2}{2}-(\nabla f(x_k)+e_k)^T\nabla f(x_k))\\
+            &\leq \alpha_k((1-\dfrac{\epsilon}{2})(\nabla f(x_k)+e_k)^T\nabla f(x_k)-(\nabla f(x_k)+e_k)^T\nabla f(x_k))\\
+            &\leq \dfrac{-\epsilon^2}{2}(\nabla f(x_k)+e_k)^T\nabla f(x_k)\\
+            &\leq \dfrac{-\epsilon^2}{2}(\delta^\prime(\delta^\prime-\delta))
+        \end{align*}
+        对于那些有限个的满足$\|\nabla f(x^k)\|<\delta^\prime$的$k$，假设其每步使得函数值变化的绝对值的总和为$M$。
+        而对于那些无穷多个满足$\nabla f(x_k)\geq\delta^\prime$条件的$k$。不妨记对应的$x_k$构成的子列为${x_{k_i}}\Rightarrow$
+        \[\lim_{n\to\infty}f(x_{k_n})<\lim_{n\to\infty} M+f(x_{k_0})-n(\dfrac{\epsilon^2}{2}(\delta^\prime(\delta^\prime-\delta)))=-\infty\]
+        与${f(x^k)}$并不趋于负无穷互相矛盾。
+        所以对于所有足够大的$k$，若$\alpha^k\in\left[\underline{\alpha}, \bar{\alpha}\right]$，此时“只有有限多个$k$满足$\|\nabla f(x^k)\|<\delta^\prime$并且${f(x^k)}$并不趋于负无穷”
+        这一条件并不成立。换而言之，此时要么$f(x_k)\to-\infty$，要么有无穷多个$\|\nabla f(x_k)\|<\delta^\prime$。
+	\end{proof}
+	
+\end{document}

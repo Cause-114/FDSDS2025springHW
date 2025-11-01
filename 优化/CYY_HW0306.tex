@@ -1,0 +1,164 @@
+\documentclass[11pt]{article}
+
+\usepackage{listings}
+\usepackage{epsfig}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{color}
+\usepackage{placeins}
+\usepackage{url}
+\usepackage{cases}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{extramarks}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{ctex}
+\usepackage{algpseudocode}
+
+
+\usepackage{booktabs}
+
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\marginparwidth 10pt
+\marginparsep 10pt
+\topmargin -20pt
+\textwidth 6.5in
+\textheight 8.5in
+\parindent = 20pt
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\minimax}{minimax}
+
+\renewcommand{\algorithmicrequire}{ \textbf{function:}}
+\renewcommand{\algorithmicreturn}{ \textbf{end function}}
+\newcommand{\blue}[1]{\begin{color}{blue}#1\end{color}}
+\newcommand{\magenta}[1]{\begin{color}{magenta}#1\end{color}}
+\newcommand{\red}[1]{\begin{color}{red}#1\end{color}}
+\newcommand{\green}[1]{\begin{color}{green}#1\end{color}}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+%\newenvironment{proof}{{\noindent\it Proof}\quad}{\hfill $\square$\par}
+
+%\usepackage{sidecap}
+\newcommand{\enterProblemHeader}[1]{
+	\nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\stepcounter{#1}
+	\nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+	\ifnum#1>0
+	\setcounter{homeworkProblemCounter}{#1}
+	\fi
+	\section{Problem \arabic{homeworkProblemCounter}}
+	\setcounter{partCounter}{1}
+	\enterProblemHeader{homeworkProblemCounter}
+}{
+	\exitProblemHeader{homeworkProblemCounter}
+}
+
+\begin{document}
+	
+	\title{\bf Homework 2}
+	
+	\author{ 陈远洋 
+	}
+	
+	
+	\date{}
+	\maketitle
+	
+	\pagebreak
+	
+	 %问题一
+	\begin{homeworkProblem}		
+		Consider the least-squares problem 
+		$$
+		\min_x \frac{1}{2}\|Ax-b\|^2.
+		$$
+		Please proof that the problem always has at least one optimal solution. You may use the property of coercive functions.
+	\end{homeworkProblem}
+	
+	
+	%解答在这里写
+	\begin{proof}
+        \quad
+
+        记$f(x)=\|Av\|^2,g(x)=\dfrac{1}{2}\|Ax-b\|^2$,并令
+        $A=\begin{pmatrix}\vec{a_1}^T&\\\cdots&\\\vec{a_n}^T\end{pmatrix}
+        \quad V=\text{span}(\vec{a_1},\cdots,\vec{a_n}) \quad
+        B=V\bigcap \{\vec{v}\vert\|\vec{v}\|=1\}$
+        \begin{enumerate}
+        \item $V=\{\vec{0}\}$
+                
+        则显然$A=0_{n\times m},g(x)\equiv \dfrac{1}{2}\|b\|^2$,
+        显然至少存在一个全局最小解。
+        \item $V\neq \{\vec{0}\}$
+        
+        否则，B是一个有界闭集，故$f(v)=\|Av\|^2$在该取值集合上存在一个最小值，记为$t^2,t\geq0$.
+        并且由于$v\in V$,故$t\neq 0$.
+        而对于$\|Av-b\|\geq \|Av\|-\|b\|\geq \|v\|\|A\dfrac{v}{\|v\|}\|-\|b\|\geq t\|v\|-\|b\|$.
+        
+        $\forall v \in V\bigcap \{v\vert\|v\|> \dfrac{2\|b\|+1}{t}\}$.有
+        $\|Av-b\|>\|b\|+1>0$.故对于$g(v)=\dfrac{1}{2}\|Av-b\|^2$,有
+        $g(v)>\dfrac{1}{2}(\|b\|+1)^2> g(\vec{0})$.
+
+        而对于$v\in V \bigcap\{v\vert\|v\|\leq\dfrac{2\|b\|+1}{t}\}$.可知自变量$v$取值为一个有界
+        闭集，故一定存在一个最优解$v_0,s.t. $在该取值集合上$g(v_0)\leq g(v)$，固有$g(v_0)\leq g(\vec{0})$.
+
+        而$\forall v \in V\bigcap \{v\vert\|v\|> \dfrac{2\|b\|+1}{t}\},g(v)>g(\vec{0})$.故$v_0$就是一个
+        在$V$上的全局最优解。
+
+        令$x=v_x+u_x$,其中$v_x\in V$，$u_x\in V^\bot$，则有:
+        \[\|Ax-b\|^2=\|A(v_x+u_x)-b\|^2=\|Av_x-b\|^2\]
+        故$g(x)=g(v_x+u_x)=g(v_x)$.由上面推导过程我们有：
+        $\forall x \in \mathbb{R}^m,\forall u \in V^\bot, g(x)=g(v_x)\geq g(v_0)=g(v_0+u)$.
+        也即$v_0+u$是一个全局最优解。
+        \end{enumerate}
+        综上所述，$g(x)$在$\mathbb{R}^m$上一定至少存在一个全局最优解。
+    \end{proof}
+\end{document}
+
+
+
+% 若$V=\{\vec{0}\}$，显然$A=0_{m\times n}$,
+% 那么$\forall x\in \mathbb{R}^n$,该式恒等于$\dfrac{1}{2}\|b\|^2$.
+% 显然至少存在一个全局最小解(optimal solution).
+
+% 否则根据$x \in V$以及$x \notin V$两种情况，我们分别作以下论述：
+% \begin{enumerate}
+%     \item $x \in V$:
+%     令$t=\min{\|\vec{a_i}\|}, i=1,\cdots,n$，则有
+%     \item $x \notin V$:
+% \end{enumerate}

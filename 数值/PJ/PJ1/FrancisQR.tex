@@ -1,0 +1,137 @@
+\documentclass{ctexart}
+\usepackage{amsmath, amsthm, amssymb, graphicx,caption,capt-of}
+\usepackage[a4paper, total={6in, 9in}]{geometry}
+\title{基于双步位移QR迭代的实schur分解实验报告}
+\author{陈远洋}
+\begin{document}
+\maketitle
+\section{代码构成与分析}
+    本实验分为my\_schur.m与test.m两个文件。完整代码详见相应代码文件。my\_schur.m文件主要实现了基于双步位移QR迭代的实schur分解。最后封装为$[Q,T]=my\_schur(A)$。该分解由三步构成：
+    \begin{enumerate}
+        \item[1] 第一步：对输入矩阵A进行Hessenberg上三角化变为H，矩阵右下角除次对角线外的元素为0。
+        \item[2] 第二步：对上Hessenberg矩阵H进行双步位移QR迭代，使对角线上变为$1\times 1$或$2\times 2$块。
+        \item[3] 第三步：每个$2\times2$块进行正交变换，使每个为实特征值的$2\times2$块变为上三角阵，而有
+        共轭复特征值的变为对角元相等的$2\times2$块。
+    \end{enumerate}
+    在上面三步中，第一步对应代码部分的house\_hessen函数。第二步对应代码部分的upper\_iter函数与
+    double\_shift\_qr函数。第三步对应代码部分的adjust2by2函数。而test.m文件为检测部分，包含一些简单的测试样例，
+    以及一个检查实schur分解是否成功的is\_schur函数。下面是对每个函数的解析：
+    \begin{enumerate}
+        \item house\_hessen函数。
+        
+            输入：待求的初始矩阵A。
+
+            输出：Hessenberg上三角化矩阵H以及该过程用到的正交变换矩阵Q。
+
+            利用Householder变换将输入矩阵A变换为Hessenberg上三角化矩阵H。同时，记录下每一步的正交变换，计算出正交变换矩阵Q。
+            一共$3n$次Householder变换，且每一次变换时间复杂度为$O(n^2)$，故该部分时间复杂度为$O(n^3)$。
+        \item upper\_iter函数
+        
+            输入：Hessenberg上三角化矩阵H，以及需要累积正交变换的正交矩阵Q。
+
+            输出：累积变换后的Hessenberg上三角化矩阵H以及累积正交变换后的Q子阵。
+
+            每次迭代，首先将次对角线足够小的元素置为0，然后分理出最大的不可约子块$H_{l:m,l:m}$,
+            将其送入double\_Shift\_QR函数迭代一次。并将需要更新的Q子阵与H子阵
+            $$(Q_{:,l:m},H_{1:l-1:,l:m},H_{l:m,m+1:end})$$
+            送入迭代过程进行累积，从而避免较大矩阵之间的乘法。
+            以确保每次迭代时间复杂度为$O(n^2)$。与此同时确保$m\geq3$，防止迭代过程出现错误。在$m<3$时，直接返回。并对已经收敛的下方保持不动。
+            最终让H对角线变为$1\times 1$或$2\times 2$块。结合实际情况，迭代次数大概为$O(n)$(可见图3)。
+        \item double\_shift\_qr函数
+        
+            输入：H的不可约Hessenberg上三角化子阵，以及需要累积变换H子阵，以及需要累积正交变换的Q子阵。
+
+            输出：累积变换后的Hessenberg上三角化矩阵H以及累积正交变换后的Q子阵。
+
+            在upper\_iter函数调用中可知，进行操作的Hessenberg子阵的一定不可约且规模大于$3\times3$，可以放心进行双步位移QR迭代。
+            每步householder变换为矩阵与小规模向量更新，故时间复杂度为$O(n)$。则总时间复杂度为$O(n^2)$。
+            最终期望使对角线收敛出$1\times 1$或$2\times 2$块。
+        \item adjust2by2函数
+        
+            输入：已经拟上三角化的矩阵H，以及需要累积正交变换的正交阵Q。
+
+            输出：实schur分解的矩阵T，以及其对应的正交阵Q。
+
+            对输入矩阵H，检测对角块大小。若为$2\times2$块，则需要进行处理。不
+            妨令该子块为$ A = \begin{pmatrix}x & w \\z & y\end{pmatrix}$令$\delta =\vert  A\vert = xy-zw , t=tr(A)=x+y$ ，
+            对特征值$\lambda$ 有$\lambda^2-t\lambda  +\delta =0 $，该二次方程判别式为$\varDelta = t^2-4\delta$，
+            若$\varDelta \geq0$，则特征值为实数，否则有共轭复特征值。对实特征值情况，解出其中一个特征值$\lambda_1$，
+            并由$(A-\lambda_1I)q=0 $ 解得q，并将其归一化$q=\begin{pmatrix}q_1 \\q_2\end{pmatrix}$，归一化后使得尽量有$| q_1|>|q_2|$。
+            将其扩充为$\begin{pmatrix} q_1 & -q_2 \\ q_2 & q_1 \end{pmatrix}$。
+            对共轭复特征值，由$A\begin{pmatrix} \cos\theta &-\sin\theta \\ \sin\theta&\cos\theta \end{pmatrix}=
+            \begin{pmatrix} \cos\theta &-\sin\theta \\ \sin\theta&\cos\theta \end{pmatrix} 
+            \begin{pmatrix} \alpha &\beta_2 \\ \beta_1 & \alpha \end{pmatrix}$ 
+            解得对应的正交变化。其中$\alpha= \dfrac{t}{2}, \beta_1\beta_2=\alpha ^2-\delta $。同样的，尽量使$|\theta|<\pi/4$。
+            使每个为实特征值的$2\times2$块变为上三角阵，而有共轭复特征值的变为对角元相等的$2\times2$块。
+            容易知道，该部分时间复杂度为$O(n^2)$。
+        \item is\_schur函数
+        
+            输入：实schur分解的矩阵T。
+
+            输出：分解结果T结果是否为拟上三角阵，并且检查对角线上为$2\times2$的块对角元是否相等。如果不是输出相关信息
+
+            is\_schur函数位于test.m文件中。首先设置一个认为可以忽略的阈值$\varepsilon $，检测$\| T_{i,1:i-2}\|_1 $是否足够小。
+            其次检测$T_{i,i-1}$是否足够小,超过阈值$\varepsilon $说明可能为$2\times2$块，需进一步检测是否有子块对角元相等。可以选择是否
+            输出认为应该是0元素的绝对值之和（即左下方非次对角线元素以及次对角线上非$2\times2$块元素绝对值之和）。
+    \end{enumerate}
+    
+\section{数值表现}
+    \subsection{小规模表现}
+    在test.m文件中，我们可以对不同矩阵A进行实schur分解。在维数较小时，我们可以用matlab的schur函数进行输出比较验证。
+    针对$3\times3$有共轭复特征值的矩阵$\begin{pmatrix}1&0&0\\2&\cos(\dfrac{\pi}{3})&-\sin(\dfrac{\pi}{3})\\3&\sin(\dfrac{\pi}{3})&\cos(\dfrac{\pi}{3})\end{pmatrix}$。
+    my\_schur函数的输出为：$$\left(\begin{array}{c c c}1.0000&1.8028&-0.8345\\0&0.5000&0.2315\\0&-3.2404&0.5000\end{array}\right)$$
+    而系统函数输出为：$$\begin{pmatrix}1.0000&0.8345&1.8028\\0&0.5000&3.2404\\0&-0.2315&0.5000\end{pmatrix}$$
+    可以看到，两者只是在对角线上元素的顺序不同。以及一些共轭块的位置不同。对test.m文件中其他矩阵进行实schur分解，
+    也可以看到其输出与matlab的schur函数输出只是在对角块上元素的顺序不同。说明my\_schur函数的输出是正确的。
+    可以用$is\_schur$函数检测分解结果是否正确。如果schur分解结果正确，则会有"congratulations!"输出。
+    如果分解结果不正确，则会有相关信息输出。几个小规模测试用例分别代表：有共轭复特征值、小规模($2\times2$)、奇异、重特征值。
+    实验中，我们都得到了"congratulations!"输出。
+    \subsection{Q的正交性与分解结果的正确性}
+    我们可以检验Q的正交性以及$QTQ^T$与A的差异。下面针对随机生成的$100\times100$矩阵进行实schur分解。
+    并将$QTQ^T-A$与$QQ^T-I$用matlab的imagesc函数进行可视化。可以看到，$QTQ^T-A$与$QQ^T-I$的每个元素均在$10^{-15}$级别，说明
+    Q的正交性较好且用$QTQ^T$刻画A非常精准。
+    \subsection{迭代次数与收敛历史}
+    更改函数接口，在upper\_iter函数中，将迭代次数作为输出之一。对5到200阶矩阵的迭代次数做观察，我们可以发现，平均1\textasciitilde2次迭代即可收敛出
+    一个$2\times2$块或者$1\times1$块。对于$n\times n$矩阵，平均迭代次数为n\textasciitilde 2n次左右，收敛速度较快。将迭代次数与矩阵大小关系画图，
+    我们可以看到，随着矩阵规模的增大，迭代次数的增长保持与之相配的线性关系。同时，单独对$100\times100$矩阵进行实schur分解，
+    迭代次数为100\textasciitilde 200次左右，画出每步迭代后已经收敛的子块阶数我们也可以看到，其与迭代次数几乎为1:2的关系。
+    \subsection{T的拟上三角性}
+    对随机生成的50到200阶矩阵,平均情况下左下方次对角线上非$2\times2$块元素以及左下方非次对角线元素绝对值之和在$10^{-22}$级别，
+    说明my\_schur函数输出的T拟上三角情况是非常好的。
+    \subsection{运行时效分析}
+    对于200到500阶矩阵，采用tic、toc函数计算运行时间。并用log函数对运行时间进行对数变换，画出运行时间与矩阵规模的关系。
+    可以看到，my\_schur函数的运行时间在$O(n^3)$级别。且对于在200阶以下的规模矩阵，平均运行时间在1s以内。
+
+
+    \begin{minipage}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{1.png}
+        \captionof{figure}{$QTQ^T-A$取绝对值}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{2.png}
+        \captionof{figure}{$QQ^T-I$取绝对值}
+    \end{minipage}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=0.45\textheight, keepaspectratio]{3.png}
+        \captionof{figure}{QR双步位移迭代次数与矩阵大小关系}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=0.3\textheight, keepaspectratio]{4.png}
+        \captionof{figure}{$100\times100$矩阵的迭代次数与已收敛阶数关系}
+    \end{minipage}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=0.45\textheight, keepaspectratio]{5.png}
+        \captionof{figure}{左下角应该为的0元素绝对值之和与矩阵规模关系}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=0.3\textheight, keepaspectratio]{6.png}
+        \captionof{figure}{算法运行时间与矩阵规模关系}
+    \end{minipage}
+\section{总结}
+    \textsl{综上，本实验实现了基于双步位移QR迭代的实schur分解。并提供了多个测试样例，用以分解结果是否正确。并从左下角零元素(is\_schur函数)、
+    Q的正交性、$QTQ^T$与A的差异等方面进行了验证。并且由于平均上只需$O(n)$次双步位移QR迭代，故该实schur分解过程的渐进时间复杂度为$O(n^3)$。}
+\end{document}

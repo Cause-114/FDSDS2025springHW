@@ -1,0 +1,135 @@
+\documentclass[11pt]{article}
+
+\usepackage{listings}
+\usepackage{epsfig}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{color}
+\usepackage{placeins}
+\usepackage{url}
+\usepackage{cases}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{extramarks}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{ctex}
+\usepackage{algpseudocode}
+
+
+\usepackage{booktabs}
+
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\marginparwidth 10pt
+\marginparsep 10pt
+\topmargin -20pt
+\textwidth 6.5in
+\textheight 8.5in
+\parindent = 20pt
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\minimax}{minimax}
+
+\renewcommand{\algorithmicrequire}{ \textbf{function:}}
+\renewcommand{\algorithmicreturn}{ \textbf{end function}}
+\newcommand{\blue}[1]{\begin{color}{blue}#1\end{color}}
+\newcommand{\magenta}[1]{\begin{color}{magenta}#1\end{color}}
+\newcommand{\red}[1]{\begin{color}{red}#1\end{color}}
+\newcommand{\green}[1]{\begin{color}{green}#1\end{color}}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+%\newenvironment{proof}{{\noindent\it Proof}\quad}{\hfill $\square$\par}
+
+%\usepackage{sidecap}
+\newcommand{\enterProblemHeader}[1]{
+	\nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\stepcounter{#1}
+	\nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+	\ifnum#1>0
+	\setcounter{homeworkProblemCounter}{#1}
+	\fi
+	\section{Problem \arabic{homeworkProblemCounter}}
+	\setcounter{partCounter}{1}
+	\enterProblemHeader{homeworkProblemCounter}
+}{
+	\exitProblemHeader{homeworkProblemCounter}
+}
+
+\begin{document}
+
+	\date{}
+	\title{\bf Homework 1}
+	\author{ 陈远洋}
+	\maketitle
+	
+	\pagebreak
+	
+	 %问题一
+	\begin{homeworkProblem}		
+		Let $F:\mathbb{R}^{n\times n}\to\mathbb{R}^{n\times n}$ and $F(X) = X^{-1}$ for any invertible matrix $X\in\mathbb{R}^{n\times n}$. $F$ is differentiable at $X$ indicates that given any perturbation matrix $\Delta X\in\mathbb{R}^{n\times n}$ such that $X+\Delta X$ is also invertible, it holds that $F(X+\Delta X) = F(X) + A(\Delta X) + o\left(\|\Delta X\|\right)$. Please show the form of $A(\Delta X)$. 
+	\end{homeworkProblem}
+	
+    \textbf{Solution:}
+
+    Firstly, let us to get a formula for $(I+\Delta X)^{-1}$, in which $\|\Delta X\|_F <1$. We have:
+    \begin{equation}
+        f(X,n)=I-\Delta X+\Delta X^2+\cdots+(-\Delta X)^{n}
+    \end{equation}
+    And we can get: 
+    \begin{equation}
+        f(X,n)(I+\Delta X)=I-\Delta X + \Delta X + \cdots - (-\Delta X)^{n+1}=I-(-\Delta X)^{n+1}       
+    \end{equation}
+    when $\lim_{n}=+\infty$, the addional term $\Delta X^{n+1}$ will be negligible. 
+    Because that $\|(-\Delta X)^{n+1}\|_F \leq \|\Delta X\|_F^{n+1}$, when $\lim_{n}=\infty$, 
+    obviously, it is zero. Therefore, we can get(known as the neumann series):
+    \begin{equation}
+        (I+\Delta X)^{-1}=\lim_{n\to\infty}\sum_{i=0}^{n}(-\Delta X)^{i}
+    \end{equation}
+    So we can get: 
+    \begin{equation}
+        F(X+\Delta X) = (X(I+X^{-1}\Delta X))^{-1}=(I+X^{-1}\Delta X)^{-1}X^{-1}=(\lim_{n\to\infty}\sum_{i=0}^{n}(-X^{-1}\Delta X)^{i})X^{-1}
+    \end{equation}
+    For that the first n term's degree is lower than n, as for the problem request, we get the first two terms,that are:
+    \begin{equation}
+        F(X+\Delta X)= X^{-1} - X^{-1}\Delta X X^{-1}+o(\|\Delta X\|^{-1})=F(X)-X^{-1}\Delta X X^{-1}+o(\|\Delta X\|)
+    \end{equation}
+    That is the answer form for the problem. Which means that the $A(\Delta X) = -X^{-1}\Delta X X^{-1}$ .
+    %解答在这里写
+	%\begin{}
+		
+	%\end{}
+	
+\end{document}

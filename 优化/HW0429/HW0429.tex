@@ -1,0 +1,299 @@
+\documentclass[11pt]{article}
+\usepackage{listings}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{algpseudocode}
+\usepackage{extramarks}
+\usepackage{ctex}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\marginparwidth 10pt
+\marginparsep 10pt
+\topmargin -20pt
+\textwidth 6.5in
+\textheight 8.5in
+\parindent = 20pt
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black]
+\tikzstyle{decision} = [diamond, aspect=2, minimum width=3cm, minimum height=1cm, text width=4cm, align=center, draw=black]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\minimax}{minimax}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+
+\newcommand{\enterProblemHeader}[1]{
+	\nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+	\nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+	\stepcounter{#1}
+	\nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+\newenvironment{homeworkProblem}[1][-1]{
+	\ifnum#1>0
+	\setcounter{homeworkProblemCounter}{#1}
+	\fi
+	\section{Problem \arabic{homeworkProblemCounter}}
+	\setcounter{partCounter}{1}
+	\enterProblemHeader{homeworkProblemCounter}
+}{
+	\exitProblemHeader{homeworkProblemCounter}
+}
+
+\begin{document}
+	
+	\title{\bf Homework 6}
+	\author{ 陈远洋 \quad 23307130322 }
+	\date{\today}
+	\maketitle	
+	
+	\begin{homeworkProblem}
+		In the BFGS method, the approximated Hessian is updated by
+		$$
+		B_{k+1}=B_k-\frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k}+\frac{y_k y_k^T}{y_k^T s_k} ,
+		$$
+		where $s_k = x_{k+1}-x_k, y_k=\nabla f(x_{k+1})-\nabla f(x_k)$. Show that if $B_k$ is symmetric positive definite, then $B_{k+1}$ is also symmetric positive definite.
+				
+		Another form of the BFGS update is 
+		$$
+		H_{k+1}=\left(I-\rho_k s_k y_k^T\right) H_k\left(I-\rho_k y_k s_k^T\right)+\rho_k s_k s_k^T,
+		$$
+		where $H_k=B_k^{-1}$.
+		Apply the Sherman–Morrison–Woodbury formula to verify the second update rule.
+	\end{homeworkProblem}
+
+    \textbf{证明：}
+
+        先证一个引理：
+        \begin{lemma}
+            设$\langle a,b\rangle _A=a^TAb\,(A \succ 0)$表示一个内积,那么这个内积满足Cauchy-Schwarz不等式:
+            $$
+            \langle a,b\rangle _A^2 \leq \langle a,a\rangle _A\langle b,b\rangle _A 
+            $$
+        \end{lemma}
+        \begin{proof}
+        设$t\in \mathbb{R}$,则有$\langle a+tb,a+tb\rangle _A=\langle a,a\rangle _A+2t\langle a,b\rangle _A+t^2\langle b,b\rangle _A\geq 0$
+        当且仅当$a,b$同向时左端项关于$t$的最小值能使等号成立。那么这个关于$t$的二次函数极小值大于等于0，即$\langle a,b\rangle _A^2 \leq \langle a,a\rangle _A\langle b,b\rangle _A $
+        引理得证。
+        \end{proof}
+
+        回到原题。首先，显然有：$B_{k+1}^T=B_{k+1}$。故$B_{k+1}$对称。由条件$\nabla f(x_{k+1})^Td_k\geq \nabla f(x_k)^Td_k$可知$y_k^Ts_k>0$。对任意$x\in\mathbb{R}^n$，且x与$x_k$不共线时，
+        由Cauchy-Schwarz不等式，有：
+        \begin{align*}
+            x^TB_{k+1}x&=\langle x,x\rangle _{B_{k}}-\dfrac{\langle x,s_k\rangle _{B_{k}}^2}{\langle s_k,s_k\rangle _{B_{k}}}+\dfrac{(x^Ty_k)^2}{y_k^Ts_k}\\
+            &> \langle x,x\rangle _{B_{k}} - \dfrac{\langle x,x\rangle _{B_{k}}\langle s_k,s_k\rangle _{B_{k}}}{\langle s_k,s_k\rangle _{B_{k}}}+\dfrac{(x^Ty_k)^2}{y_k^Ts_k}\\
+            &=\dfrac{(x^Ty_k)^2}{y_k^Ts_k}\\
+            &\geq0
+        \end{align*}
+        在$x$与$s_k$同向时第二步等号成立，但第4步不等号严格成立，故在$s_k$与$x$共线时，也有$x^TB_{k+1}x>0$。
+    
+        综上，$B_{k+1}$是对称正定矩阵。
+
+        接下来证明$H_{k+1}$更新表达式的正确性：令$U=\begin{pmatrix}y_k&B_ks_k\end{pmatrix}$，$A=\begin{pmatrix}\dfrac{1}{y_k^Ts_k}&0\\0&-\dfrac{1}{s_k^TB_ks_k}\end{pmatrix}$。
+        有：$B_{k+1}=B_k+UAU^T$。由Shellman-Morrison-Woodbury公式，有：
+        \begin{align*}
+            H_{k+1}&=H_k-H_kU(A^{-1}+U^TH_kU)^{-1}U^TH_k\\
+            &=H_k-\begin{pmatrix}H_ky_k&s_k\end{pmatrix}(\begin{pmatrix}y_k^Ts_k&0\\0&-s_k^TB_ks_k\end{pmatrix}+\begin{pmatrix}y_k^TH_ky_k&y_k^TH_kB_ks_k\\s_k^TB_kH_ky_k&s_k^TB_kH_kB_ks_k\end{pmatrix})^{-1}\begin{pmatrix}y_k^TH_k\\s_k^T\end{pmatrix}\\
+            &=H_k-\begin{pmatrix}H_ky_k&s_k\end{pmatrix}\begin{pmatrix}y_k^Ts_k+y_k^TH_ky_k&y_k^Ts_k\\s_k^Ty_k&0\end{pmatrix}^{-1}\begin{pmatrix}y_k^TH_k\\s_k^T\end{pmatrix}\\
+            &=H_k+\dfrac{1}{(y_k^Ts_k)^2}\begin{pmatrix}H_ky_k&s_k\end{pmatrix}\begin{pmatrix}0&-y_k^Ts_k\\-s_k^Ty_k&y_k^Ts_k+y_k^TH_ky_k\end{pmatrix}\begin{pmatrix}y_k^TH_k\\s_k^T\end{pmatrix}\\
+            &=H_k+\dfrac{1}{(y_k^Ts_k)^2}\begin{pmatrix}H_ky_k&s_k\end{pmatrix}\begin{pmatrix}-y_k^Ts_ks_k^T\\y_k^TH_ky_ks_k^T+y_k^Ts_ks_k^T-s_k^Ty_ky_k^TH_k\end{pmatrix}\\
+            &=H_k+\dfrac{1}{(y_k^Ts_k)^2}\begin{pmatrix}-H_ky_ky_k^Ts_ks_k^T+s_ky_k^TH_ky_ks_k^T-s_ks_k^Ty_ky_k^TH_k+s_ky_k^Ts_ks_k^T\end{pmatrix}\\
+            &=H_k+\dfrac{s_ky_k^TH_ky_ks_k^T}{(y_k^Ts_k)^2}-\dfrac{H_ky_ks_k^T}{y_k^Ts_k}-\dfrac{s_ky_k^TH_k}{y_k^Ts_k}+\dfrac{s_ks_k^T}{y_k^Ts_k}\\
+            &=\left(I-\rho_k s_k y_k^T\right) H_k\left(I-\rho_k y_k s_k^T\right)+\rho_k s_k s_k^T
+        \end{align*}
+        其中$\rho_k=\dfrac{1}{y_k^Ts_k}$.
+
+        综上，$H_{k+1}$更新表达式的正确性证毕。
+
+	\begin{homeworkProblem}
+		There are many other quasi-Newton updating formulae apart from BFGS, DFP, and SR1 method. Of particular interest is the Broyden class, a family of updates specified by the following general formula:
+		\begin{equation}
+			\label{broyden}
+			B_{k+1}=B_k-\frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k}+\frac{y_k y_k^T}{y_k^T s_k}+\phi_k\left(s_k^T B_k s_k\right) v_k v_k^T,
+		\end{equation}
+		where $\phi_k$ is a scalar and $v_k$ is defined as
+		$$
+		v_k=\left[\frac{y_k}{y_k^T s_k}-\frac{B_k s_k}{s_k^T B_k s_k}\right].
+		$$
+		Show that the formula \eqref{broyden} is a ``linear combination'' of DFP and BFGS method as
+		$$
+		B_{k+1}=\left(1-\phi_k\right) B_{k+1}^{\text {BFGS}}+\phi_k B_{k+1}^{\text {DFP}},
+		$$
+		where $B_{k+1}^{\text {BFGS}}$ and $B_{k+1}^{\text {DFP}}$ denotes $B_{k+1}$ in BFGS and DFP method. Also verify the secant equation holds for $B_{k+1}$ in \eqref{broyden}.
+	\end{homeworkProblem}
+
+    \textbf{证明：}
+
+    首先，我们知道，BFGS方法的更新公式为：
+    \begin{equation}
+        B_{k+1}^{\text {BFGS}}=B_k-\frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k}+\frac{y_k y_k^T}{y_k^T s_k}       
+    \end{equation}
+    而DFP方法的更新公式为：
+    \begin{equation}\label{dfp}
+        H_{k+1}^{\text{DFP}}=H_k-\frac{H_ky_ky_k^TH_k}{y_k^TH_ky_k}+\frac{s_ks_k^T}{s_ky_k^T}        
+    \end{equation}
+    由Problem1的证明可知，我们可以进一步将\hyperref[dfp]{DFP方法的更新公式}写成关于$B_k$的表达式：
+    \begin{equation}\label{dfp2}
+        B_{k+1}^{\text {DFP}}=B_k+\dfrac{y_ky_k^T}{s_k^Ty_k}+\dfrac{s_k^TB_ks_k}{(s_k^Ty_k)^2}y_ky_k^T-\dfrac{B_ks_ky_k^T+y_ks_k^TB_k}{s_k^Ty_k}
+    \end{equation}
+
+    而对$\phi_k$引导的尾项，我们有：
+    \begin{align*}
+        (s_k^TB_ks_k)v_kv_k^T&=(s_k^TB_ks_k)(\frac{y_k}{y_k^Ts_k}-\frac{B_ks_k}{s_k^TB_ks_k})(\frac{y_k^T}{s_k^Ty_k}-\frac{s_k^TB_k}{s_k^TB_ks_k})\\
+        &=\dfrac{s_k^TB_ks_k}{(s_k^Ty_k)^2}y_ky_k^T-\dfrac{B_ks_ky_k^T+y_ks_k^TB_k}{s_k^Ty_k}+\dfrac{B_ks_ks_k^TB_k}{s_k^TB_ks_k}\\
+    \end{align*}
+
+    所以，我们可以将\hyperref[dfp2]{关于$B_{k+1}$的DFP方法的更新公式}可以写成：
+    \begin{equation}
+        B_{k+1}^{\text{DFP}}=B_{k+1}^{\text {BFGS}}+\left(s_k^T B_k s_k\right) v_k v_k^T
+    \end{equation}
+
+    那么\hyperref[broyden]{(1)式}可改写为：
+    \begin{align*}
+        B_{k+1}&=B_{k+1}^{\text{BFGS}}+\phi_k\left(s_k^T B_k s_k\right) v_k v_k^T\\
+        &=B_{k+1}^{\text{BFGS}}+\phi_k(B_{k+1}^{\text {DFP}}-B_{k+1}^{\text {BFGS}})\\
+        &=(1-\phi_k)B_{k+1}^{\text{BFGS}}+\phi_k B_{k+1}^{\text{DFP}}
+    \end{align*}
+
+    接下来验证所谓的secant equation。直观上，我们有$H_{k+1}^{\text{DFP}}y_k=s_k,B_{k+1}^{\text{BFGS}}s_k=y_k$，所以有：
+    $B_{k+1}^{\text{DFP}}s_k=y_k$。可以推出$((1-\phi_k)B_{k+1}^{\text{BFGS}}+\phi_k B_{k+1}^{\text{DFP}})s_k=(1-\phi_k)y_k+\phi_ky_k=y_k$。
+
+    而更进一步地，我们也只需验证$v_k^Ts_k=0$即可。而：
+    \begin{align*}
+        v_k^Ts_k&=\left(\frac{y_k}{y_k^T s_k}-\frac{B_ks_k}{s_k^TB_ks_k}\right)^Ts_k\\
+        &=\dfrac{y_k^Ts_k}{y_k^T s_k}-\dfrac{s_k^TB_ks_k}{s_k^TB_ks_k}\\
+        &=1-1\\
+        &=0
+    \end{align*}
+
+    所以\hyperref[broyden]{(1)式}引导的更新表达式满足所谓的secant equation。
+
+	\begin{homeworkProblem}		
+		(\textbf{Coding problem}) Consider the logistic regression problem for binary classification: 
+		$$
+		\min_x \frac{1}{m}\sum_{i=1}^{m}\log\left(1+\exp(-b_ia_i^Tx)\right) + \mu\|x\|_2^2,
+		$$
+		where $x\in\mathbb{R}^n, a_i\in\mathbb{R}^n$, $b_i\in\{\pm 1\}$ denotes the class that $a_i$ belongs to, $n$ is the dimension of the variable, $m$ is the number of data. $\mu$ is the regularization parameter. 
+		
+		Please use a quasi-Newton method to solve above problem, using the \textbf{a1a} data given in LIBSVM datasets, or data generated by yourself. 
+		A detailed description of the data can be found in \url{https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html#a1a}. Please write a report to illustrate the method you used and present your experiment results.\\
+		
+		Note: 
+		\begin{itemize}
+			\item The gradient of the objective function is $$
+			\nabla f(x)=\frac{1}{m} \sum_{i=1}^m \frac{1}{1+\exp \left(-b_i a_i^T x\right)} \cdot \exp \left(-b_i a_i^T x\right) \cdot\left(-b_i a_i\right)+2 \mu x
+			$$
+			\item The regularization parameter $\mu$ can be set as $\mu=1e-3$.
+			\item If you use `a1a' dataset, you only need to use the `a1a' file, where $m=1605$, and $n=123$. In the file, the first column of each row denotes the label ($b_i$) of each data, and the following rows indicate elements of which coordinates of $a_i$ are non-zero.
+			\item If you generate the data by yourself, you can set $m\geq100, n\geq50$.
+		\end{itemize}
+		
+	\end{homeworkProblem}
+	\subsection{解存在性分析}
+    首先，该问题一定是有解并且唯一的。前面的求和部分与后面正则项在一定范围内是有界的，并且前面部分是恒正的。不妨设有0点附
+    近的领域$D=\{x|\mu\|x\|_2^2\leq f(0)\}$。由weirstrass定理，我们知道在$D$内存在原函数最小值$f(x_0)\leq f(0)$。
+    而在$D$之外，$f(x)>\mu\|x\|_2^2>f(0)\geq f(x_0)$。所以$x_0$也是全局最小值。另外，正则化项$\mu \|x\|_2^2$是严格凸函数。
+    而单看前面的求和中的每一项，对于函数$h(z)=\log(1+\exp(-z))$，其导数为$h'(z)=\frac{-exp(-z)}{1+\exp(-z)}$，
+    而$h''(z)=\frac{exp(-z)}{(1+\exp(-z))^2}>0$。所以这个函数也是严格凸的。所以$x_0$也是全局唯一的最小值。
+
+    \subsection{代码构成分析}
+    求解这个问题的梯度方法以及拟牛顿方法的通用步骤：
+
+    \begin{tikzpicture}[node distance=2cm, auto]
+        \node (start) [startstop] {读取数据$A$、$b$，设置参数$\mu$、初值、精度要求、最大迭代次数};
+        \node (pro1) [process, below of=start] {选择方向$d$、步长$\alpha$};
+        % 这里的文本会根据设定的 text width 自动换行，但菱形的大小是固定的
+        \node (dec1) [decision, below of=pro1, yshift=-1cm] {判断是否有梯度精度达到要求\\或者迭代次数达到最值};
+        \node (pro2a) [process, below of=dec1, yshift=-1cm] {结束迭代，输出结果};
+        \node (pro2b) [process, right of=dec1, xshift=5.5cm] {更新选择方向、步长所需参数};
+        \draw [arrow] (start) -- (pro1);
+        \draw [arrow] (pro1) -- (dec1);
+        \draw [arrow] (dec1) -- node[anchor=east] {是} (pro2a);
+        \draw [arrow] (dec1) -- node[anchor=south] {否} (pro2b);
+        \draw [arrow] (pro2b) |- (pro1);    
+    \end{tikzpicture}
+
+    在主函数中我主要实现初始化数据阶段，以及效果比较。对拟牛顿法的实现上，我写了BFGS和DFP两个方法。而迭代的过程则可以通过调用不同接口而对应不同方法。
+    下面来看各个辅助函数以及其对应的作用：
+
+    \begin{itemize}
+        \item \texttt{logisticRegression}: 对应优化的目标函数，输入参数为$\mu$、$A$、$b$、$x$。
+        在后续使用过程中，可以通过在句柄中设定参数将其变为关于x的单变量函数。
+        \item \texttt{grad\_LR}: 顾名思义，上一个函数关于x的梯度。
+        \item \texttt{LineSearch}: 输入参数$f$、$df$、$d$ 、$x$ 、$a$、$c$ 、$\beta$。输出在$d$方向下满足$armijo$条件
+        的以$a$为初始值，每次递减$\beta$的最大步长。但是实际实现中，为了确保拟牛顿算法$H$的正定性，我们要求$\nabla f(x+ad)^Td<\nabla f(x)^Td$
+        （相当于加了一个c2=1的wolfe准则）。但是值得注意的是，这个条件非常宽松，以至于在本次实验中我没有遇到满足前一个条件而不满足这个条件
+        的情况，所以LineSearch的过程可以认为是$armijo$的。我设定$a=1.5$,$c=0.01$, $\beta=0.99$。
+        在后续使用中，可以将已经调试好的参数通过固定在句柄中的方式调用。
+        \item \texttt{BFGS}: 对应BFGS的解决方法。输入参数$f$、$df$、$x_0$、$maxIter$、$tol$。输出$x$的BFGS迭代值。
+        值得说明的是我们知道BFGS关于$H$的迭代表达式:
+        \[H_{k+1}=(I-\rho_k s_k y_k^T)H_k(I-\rho_k y_k s_k^T)+\rho_k s_ks_k^T=H_k-(t+t^T)+(\rho_k+\rho_k^2y_k^TH_ky_k)s_ks_k^T\]
+        其中$\rho_k=\frac{1}{s_k^Ty_k},t=\rho_kH_ky_ks_k^T$，通过预先计算$t$跟$\rho_k$，我们可以避免矩阵与矩阵之间的乘法，
+        把单次更新的时间复杂度降为$O(n^2)$。
+        \item \texttt{DFP}: 对应DFP的解决方法。输入参数$f$、$df$、$x_0$、$maxIter$、$tol$。输出$x$的DFP迭代值。
+        DFP的迭代过程与BFGS类似，总之注意加上括号改变运算顺序，避免矩阵与矩阵之间的直接乘法。保证单次更新时间复杂度在$O(n^2)$级别。
+    \end{itemize}
+\subsection{参数说明}
+    关于为什么步长初值取成1.5，是出于选择大步长以及减小每次迭代的抖动的综合考量。
+    以DFP为例，当步长初值较小时，可能每次向前“迈的步子”太小，导致离当前方向下的最优解很远。
+    而这也会导致梯度模长的“抖动”。当步长初值较大时，可能每次向前“迈的步子”太大，导致迭代过程过于不稳定。
+    出于这样的综合考量，在实验中，我试出来以1.5为初值步长的效果最好。
+    详见\hyperref[fig:ab]{下图}：
+    \begin{figure}[!htb]\label{fig:ab}
+        \centering
+        \includegraphics[width=0.45\textwidth]{picture/a.jpg}\hspace{1em}
+        \includegraphics[width=0.45\textwidth]{picture/b.jpg}
+        \caption{初始步长过大或者过小导致的抖动（左图初始步长为1，右图初始步长为2）}
+    \end{figure}
+\subsection{实验结果}
+    最优解采取BFGS得到的结果，放在x1.mat文件中。当设置停机条件为梯度模长小于$1\times 10^{-8}$时，最优解对应的函数值为$0.33691514$。
+    达到终点时，BFGS迭代次数为144，DFP迭代次数为513。二者终点处达到的梯度模长分别
+    为$8.95\times10^{-9}$跟$7.35\times10^{-9}$。
+
+    \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=0.45\textwidth]{picture/res.png}
+        \caption{最终结果（加上SD）预期输出}
+    \end{figure}
+
+    每步迭代后函数值减去最小值取对数的图像以及梯度模长变化如图\hyperref[f3]{3}、\hyperref[f4]{4}、\hyperref[f5]{5}所示：
+    \begin{figure}[!htb]\label{f3}
+        \centering
+        \includegraphics[width=0.45\textwidth]{picture/1-1.jpg}\hspace{1em}
+        \includegraphics[width=0.45\textwidth]{picture/1-2.jpg}
+        \caption{BFGS的收敛情况}
+    \end{figure}
+    \begin{figure}[!htb]\label{f4}
+        \centering
+        \includegraphics[width=0.45\textwidth]{picture/2-1.jpg}\hspace{1em}
+        \includegraphics[width=0.45\textwidth]{picture/2-2.jpg}
+        \caption{DFP的收敛情况}
+    \end{figure}
+    \begin{figure}[!htb]\label{f5}
+        \centering
+        \includegraphics[width=0.45\textwidth]{picture/3-1.jpg}\hspace{1em}
+        \includegraphics[width=0.45\textwidth]{picture/3-2.jpg}
+        \caption{最速下降法（SD）的收敛情况}
+    \end{figure}
+
+    可以看到总体上大致是一个线性的过程，整体上呈现微弱的超线性收敛趋势，这似乎与我们之前的预期不太相符。
+    但为了验证拟牛顿法的优越性，我们加入最速下降的梯度法作为对比。达到相同精度时，最速下降法的迭代次数为3761。
+    所以在这个问题上我们的拟牛顿方法远远快于梯度方法。
+\end{document}

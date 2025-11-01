@@ -1,0 +1,482 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[UTF8]{ctex}  
+\usepackage{array,graphicx,caption,float,geometry}
+\usepackage[colorlinks=true]{hyperref}
+\geometry{margin=1in}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\LARGE \textbf{数据库及实现课程项目报告} \par}
+    \vspace{2cm}
+    
+    {\huge \textbf{DataSpider 数据库管理系统项目文档} \par}
+    \vspace{1cm}
+    
+    {\Large 2024--2025 春季学期 \par}
+    
+    \vfill
+    
+    \begin{flushleft}
+    \Large
+    \textbf{小组名称：} 第4组 \\
+    \textbf{组员名单：} 陈远洋、方昱凯、郭轩岩、王艺涵 \\
+    \textbf{指导教师：} 郑卫国 \\
+    \textbf{提交日期：} \today
+    \end{flushleft}
+
+    \vspace{1cm}
+    \hrule
+    \vspace{0.5cm}
+    
+    {\small 项目代码、数据库脚本及详细文档已托管于GitHub，便于团队协作和后续维护：\\
+    \href{https://github.com/HanLoyce/project}{https://github.com/HanLoyce/project}}
+    
+    \vspace*{1cm}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+\section{系统需求分析}
+\subsection{现实需求}
+\subsubsection{核心需求}
+\begin{itemize}
+    \item 快速检索：用户需要在短时间内快速检索到目标网站的所有相关信息并储存下来，包括文本、图片、链接等形式
+    \item 精准获取：支持通过关键字或关键标志搜索特定网页信息，而非全部内容，因此需要对目标网站的信息进行筛选
+\end{itemize}
+
+\subsubsection{信息类型需求}
+\begin{itemize}
+\item 网站基本信息：域名、所属主体、包含网页数等
+\item 网页内容信息：文字、图片、所属网站等
+\item 文本/图片信息：内容、所属网页、来源等
+\item 数据源信息：文字、内容相关的数据源信息
+
+\end{itemize}
+\subsection{业务流程}
+\subsubsection{爬虫运行流程}
+\begin{enumerate}
+    \item 初始化阶段：导入网站URL，设定爬取页数和时间间隔，启动爬取任务。
+    \item 状态显示机制：系统实时显示各个爬取任务的爬取状态，利于用户监听。
+    \item 异常处理机制：实时汇报爬取异常，记录爬取失败的页面信息，支持重试机制。
+\end{enumerate}
+\subsubsection{数据存储流程}
+\begin{enumerate}
+    \item 数据清洗：非结构化数据格式化处理，内容标准化处理。
+    \item 分级存储：按照网站-网页-内容架构存储，清晰易查看。
+    \item 数据独立：不同账户间已爬取内容相互不可见，保证账户隐私性。
+\end{enumerate}
+\subsubsection{用户使用流程}
+\begin{enumerate}
+    \item 参数设定：用户从系统提供的网站列表中选择目标网站,设置检索条件，开始爬取。
+    \item 数据展示：系统从数据库检索匹配数据，以清晰结构分级展示结果。
+    \item 前端交互：支持关键词搜索相关网站、网页、数据内容，支持跳转目标网址。
+    \item 数据反馈：检索成功：结构化处理后保存在本地数据库中; 检索失败：提供友好提示。
+\end{enumerate}	
+
+\subsection{功能需求}
+\subsubsection{用户界面}
+\begin{enumerate}
+  \item 支持用户创建账号，账号间数据各自独立，账号内数据稳定存储。
+  \item 提供直观、易操作的用户界面，有充分的安全性提示。
+  \item 支持网站选择、内容关键字检索、直接网址跳转、数据管理等功能。
+  \item 显示爬取统计信息（如爬取页数、数据量等）
+\end{enumerate}
+
+\subsubsection{爬虫模块}
+\begin{enumerate}
+  \item 实现高效的数据爬取功能，实时显示任务状态。
+  \item 支持文本内容和图片的抓取，会存储在相关网页下。
+  \item 自动分类存储不同数据类型，按 网站-网页-内容/图片 的结构存储
+  \item 可配置的爬取规则和策略，如爬取网页数，爬取时间间隔
+\end{enumerate}
+
+\subsubsection{数据管理}
+\begin{enumerate}
+  \item 实现数据的CRUD功能（增加、删除、修改、查询）。
+  \item 提供后台管理界面，可查看各个用户相关爬取记录。
+  \item 支持导出已爬取数据，通过命令行实现导出和保存。
+\end{enumerate}
+
+\subsubsection{检索功能}
+\begin{enumerate}
+  \item 支持检索文本关键字，包含标题含有的关键字和内容中的高频关键字。
+  \item 设计高效的索引策略，优化检索性能，确保快速响应。
+  \item 支持完整查看检索结果，支持直接跳转相关网址。
+\end{enumerate}
+
+
+\subsection{数据流图}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{1.png}
+    \caption{数据流图}
+\end{figure}
+
+\subsection{实体及属性}
+\begin{enumerate}
+    \item 网站：(ID，域名，用户归属，标题，描述，首页地址)
+    \item 网页：(ID，URL，抓取时间，所属网站)
+    \item 内容：(内容ID，文本内容，所属网页，关键字，内容类型)
+    \item 图片：(URL，所属网页，图片描述，分辨率)
+    \item 数据源：(URL，发布者，发布时间)
+    \item 爬取任务：(任务ID，用户ID，目标网站，爬取状态，开始时间，结束时间，错误信息)
+\end{enumerate}
+\subsection{数据字典}
+\newpage
+
+\begin{table}[!htb]
+\centering
+{\fontsize{8}{11}\selectfont
+\begin{tabular}{|c|c|>{\raggedright\arraybackslash}m{3cm}|c|c|}
+\hline
+数据名称 & 说明 & 类型 & 长度、取值 & 别名 \\\hline
+网站序号 & 目标网站的序号 & INT & $-2^{31} \sim 2^{31}-1$ & id \\\hline
+用户归属 & 目标对象的用户归属 & VARCHAR(255) & 255 & user \\\hline
+网站域名 & 目标网站的域名 & VARCHAR(255) & 255 & domain \\\hline
+网站标题 & 目标网站的标题 & VARCHAR(255) & 255 & title \\\hline
+网站描述 & 目标网站的描述 & TEXT & - & description \\\hline
+首页地址 & 目标网站的首页地址 & VARCHAR(500) & 500 & homepage \\\hline
+网页序号 & 目标网页的序号 & INT & $-2^{31} \sim 2^{31}-1$ & id \\\hline
+网页URL & 每个网页的URL & VARCHAR(500) & 500 & url \\\hline
+抓取时间 & 网页的抓取时间 & DATETIME & 合理的时间范围 & crawl\_time \\\hline
+所属网站 & 网页所属的网站的域名 & VARCHAR(255) & 255 & website \\\hline
+内容ID & 文本信息编号 & INT & $-2^{31} \sim 2^{31}-1$ & content\_id \\\hline
+文本内容 & 网页的文本内容 & TEXT & - & text \\\hline
+所属网页 & 文本信息所属的网页的URL & VARCHAR(500) & 500 & webpage \\\hline
+关键字 & 文本信息的关键字 & VARCHAR(500) & 500 & keywords \\\hline
+类型 & 文本信息的类型 & ENUM('text','link') & 在枚举中选择 & type \\\hline
+图片URL & 唯一标识一张图片 & VARCHAR(500) & 500 & url \\\hline
+所属网页&图片所属的网页的URL&VARCHAR(500)&500&webpage \\\hline
+图片描述&网页中对图片的描述&VARCHAR(255)&255&description\\\hline
+分辨率&图片的分辨率&VARCHAR(50)&50&resolution\\\hline
+数据源URL&数据来源网页URL&VARCHAR(500)&500&data\_source\_url\\\hline
+发布者&数据源的发布者&VARCHAR(100)&100&publisher\\\hline
+发布时间&数据源的发布时间&DATETIME&合理的时间范围&publish\_time\\\hline
+爬取任务序号&爬取任务的序号& INT & $-2^{31} \sim 2^{31}-1$ &id\\\hline
+爬取状态&爬取任务的进行状态&\shortstack[l]{ENUM('crawling',\\'complete', 'fail')}&在枚举中选择&status \\\hline
+开始时间&爬取任务中开始爬取的时刻&DATETIME&合理的时间范围&start\_time \\\hline
+结束时间&爬取任务中爬取完成的时刻&DATETIME&合理的时间范围&end\_time \\\hline
+错误信息&爬取任务异常时的错误信息提示&TEXT& - &error\_msg \\\hline
+\end{tabular}
+}
+\caption{数据项}
+\end{table}
+
+\begin{table}[!htb]
+\centering
+{\fontsize{10}{12}\selectfont
+\begin{tabular}{|c|c|p{7cm}|}
+\hline
+数据结构名&说明&数据组成\\\hline
+数据源信息表 & 数据源的相关信息 & 数据源URL\ 发布者信息\ 发布时间\\\hline
+网页信息表 & 所爬取网页的相关信息 & 网页序号\ 网页URL\ 爬取时间\ 所属网站序号\\\hline
+内容信息表 & 所爬取内容的相关信息 & 内容序号\ 文本内容\ 关键字\ 类型\ 网页序号\\\hline
+网站信息表 & 所爬取网站的相关信息 & 网站序号\ 域名\ 标题\ 描述\ 主页\ 用户序号 \\\hline
+爬取任务信息表&特定爬取任务的信息&序号\ 爬取状态\ 开始时间\ 结束时间\ 错误信息\ 用户序号\ 网站序号 \\\hline
+图片信息表 & 所爬取图片的相关信息 & 图片URL\ 图片描述\ 分辨率\ 所属网页序号\\\hline
+\end{tabular}
+}
+\caption{数据结构}
+\end{table} 
+
+\begin{table}[!htb]
+\centering
+{\fontsize{8}{11}\selectfont
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+数据流名&说明&数据流来源&数据流去向&数据组成\\\hline
+CRAWL&按设定方式进行爬取操作&爬虫模块&网络数据爬取管理系统&所有实体属性\\\hline
+SEARCH&用户对已有网站的检索&网络数据爬取管理系统&用户&所有实体属性\\\hline
+VIEW&用户查看网站数据&网络数据爬取管理系统&用户&所有实体属性\\\hline
+DELETE&用户请求删除网站数据&用户&网络数据爬取管理系统&所有实体属性\\\hline
+
+\end{tabular}
+}
+\caption{数据流}
+\end{table} 
+ 
+\begin{table}[!htb]
+\centering
+{\fontsize{8}{11}\selectfont
+\begin{tabular}{|c|p{2cm}|c|c|p{2cm}|p{3cm}|c|}
+\hline
+数据储存名&说明&编号&数据流来源&数据流去向&数据组成&数据量\\\hline
+
+网站信息表&数据库存放、记录网站详细信息&D1&爬虫模块&网络数据爬取管理系统&网站序号\ 域名\ 标题\ 描述\ 主页\ 用户序号&1000个\\\hline
+网页信息表&数据库存放、记录网页详细信息&D2&爬虫模块&网络数据爬取管理系统&网页序号\ 网页URL\ 爬取时间\ 所属网站序号&10000个\\\hline
+内容信息表&数据库存放、记录网页文本信息&D3&爬虫模块&网络数据爬取管理系统&内容序号\ 文本内容\ 关键字\ 类型\ 网页序号&50000条\\\hline
+图片信息表&数据库存放、记录网页图片信息&D4&爬虫模块&网络数据爬取管理系统&图片URL\ 图片描述\ 分辨率\ 所属网页序号&20000张\\\hline
+数据源信息表&数据库存放、记录数据源信息&D5&爬虫模块&网络数据爬取管理系统&数据源URL\ 发布者信息\ 发布时间&20000个\\\hline
+爬取任务信息表&数据库存放、记录爬取任务信息&D6&爬虫模块&网络数据爬取管理系统&序号\ 爬取状态\ 开始时间\ 结束时间\ 错误信息\ 用户序号\ 网站序号&1000个 \\\hline
+\end{tabular}
+}
+\caption{数据储存}
+\end{table} 
+ 
+
+
+\section{数据库概念模型设计}
+\subsection{实体与联系}
+\begin{enumerate}
+    \item 网站 $\leftrightarrow $ 网页 (1:N) 关联字段：Website.域名 $\leftrightarrow $ Webpage.所属网站
+    \item 网页 $\leftrightarrow $ 内容 (1:N)  关联字段：Webpage.URL $\leftrightarrow $ Content.所属网页
+    \item 网页 $\leftrightarrow $ 图片 (1:N)  关联字段：Webpage.URL $\leftrightarrow $ Image.所属网页
+    \item 数据源 $\leftrightarrow $ 内容 (1:1) 关联字段：所属Webpage.URL $\leftrightarrow $ Content.所属网页
+    \item 数据源 $\leftrightarrow $ 图片 (1:1) 关联字段：DataSource.数据源URL $\leftrightarrow $ Image.图片URL
+\end{enumerate}
+
+\subsection{完整性约束}
+\begin{enumerate}
+    \item 实体完整性约束：所有主键字段(见3.1)必须为NOT NULL且唯一。
+    \item 参照完整性约束：确保引用一致性，支持级联删除(如删除网站时自动删除关联网页)。
+    \begin{itemize}
+        \item Webpage.所属网站$\rightarrow$ Website.域名
+        \item DataSource\_Content.URL$\rightarrow$DataSource.URL
+        \item DataSource\_Content.内容ID$\rightarrow$Content.内容ID
+        \item Content.所属网页$\rightarrow$Webpage.URL
+        \item Image.所属网页$\rightarrow$Webpage.URL
+        \item Image.图片URL$\rightarrow$DataSource.数据源URL
+    \end{itemize}
+    \item 检查完整性约束:本项目中自定义的完整性约束，如枚举约束(website.crawl\_freq、\\content.type等)要在取值范围内。
+    Image.resolution这一VARCHAR类型需符合"宽度$\times$高度"这样的字符串格式(如1920$\times$1080)。
+\end{enumerate}
+
+\subsection{E-R图}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{ER.png}
+    \caption{E-R图}
+\end{figure}
+
+
+\section{数据库设计}
+\subsection{Website（网站）}
+该表用于存储被爬取的网站基本信息，字段说明如下：
+
+\begin{description}
+  \item[\texttt{id}] 网站编号，主键，类型为 \texttt{INT}
+  \item[\texttt{user}] 用户归属，类型为 \texttt{VARCHAR(255)}
+  \item[\texttt{domain}] 网站域名，类型为 \texttt{VARCHAR(255)}
+  \item[\texttt{title}] 网站标题，类型为 \texttt{VARCHAR(255)}
+  \item[\texttt{description}] 网站描述信息，类型为 \texttt{TEXT}
+  \item[\texttt{homepage}] 网站首页地址，类型为 \texttt{VARCHAR(500)}
+\end{description}
+
+\subsection{Webpage（网页）}
+该表记录网站下的具体网页：
+
+\begin{description}
+  \item[\texttt{id}] 网页编号，主键，类型为 \texttt{INT}
+  \item[\texttt{url}] 网页地址，类型为 \texttt{VARCHAR(500)}
+  \item[\texttt{crawl\_time}] 抓取时间，类型为 \texttt{DATETIME}
+  \item[\texttt{website}] 所属网站域名，类型为 \texttt{VARCHAR(255)}
+\end{description}
+
+\subsection{Content（内容）}
+该表存储网页的文本内容：
+
+\begin{description}
+  \item[\texttt{id}] 内容编号，主键，类型为 \texttt{INT}
+  \item[\texttt{text}] 网页文本内容，类型为 \texttt{TEXT}
+  \item[\texttt{webpage}] 所属网页地址，类型为 \texttt{VARCHAR(500)}
+  \item[\texttt{keywords}] 内容关键字，类型为 \texttt{VARCHAR(500)}，该属性上建有索引，方便快速查询。
+  \item[\texttt{type}] 内容类型，枚举值 \texttt{('text','link')}
+\end{description}
+
+\subsection{Image（图片）}
+用于记录网页中提取的图片信息：
+
+\begin{description}
+  \item[\texttt{url}] 图片地址，主键，类型为 \texttt{VARCHAR(500)}
+  \item[\texttt{webpage}] 所属网页地址，类型为 \texttt{VARCHAR(500)}
+  \item[\texttt{description}] 图片描述信息，类型为 \texttt{VARCHAR(255)}
+  \item[\texttt{resolution}] 图片分辨率，类型为 \texttt{VARCHAR(50)}
+\end{description}
+
+\subsection{DataSource（数据源）}
+该表存储来自第三方的数据源信息：
+
+\begin{description}
+  \item[\texttt{url}] 数据源页面地址，主键，类型为 \texttt{VARCHAR(500)}
+  \item[\texttt{publisher}] 发布者，类型为 \texttt{VARCHAR(100)}
+  \item[\texttt{publish\_time}] 发布时间，类型为 \texttt{DATETIME}
+\end{description}
+
+\subsection{CrawlTask（爬取任务）}
+用于记录每次用户提交的爬虫任务：
+
+\begin{description}
+  \item[\texttt{id}] 任务编号，主键，类型为 \texttt{INT}
+  \item[\texttt{user}] 用户ID，类型为 \texttt{VARCHAR(255)}
+  \item[\texttt{website}] 目标网站，类型为 \texttt{VARCHAR(255)}
+  \item[\texttt{status}] 当前任务状态，枚举值 \texttt{('crawling','complete','fail')}
+  \item[\texttt{start\_time}] 开始时间，类型为 \texttt{DATETIME}
+  \item[\texttt{end\_time}] 结束时间，类型为 \texttt{DATETIME}
+  \item[\texttt{error\_msg}] 错误信息，类型为 \texttt{TEXT}
+\end{description}
+
+
+
+\section{功能设计}
+
+\subsection{账号管理}
+系统支持用户通过手动注册新账号或登录已有账号来使用平台。注册流程要求用户提供唯一的用户名、
+强密码，确保账户安全与真实性。已爬取的数据内容均与账号绑定，且账号间数据互不共享，保障用户
+隐私和数据隔离。用户可在个人中心安全退出以及切换账号。
+
+\subsection{数据爬取}
+用户通过输入目标网站的网址，设置爬取页数、最大超时秒数后创建爬取任务。任务提交后，系统会实时监控
+并反馈任务状态，包括“等待中”、“爬取中”、“已完成”及“失败”等，帮助用户掌握任务进展。后台调度系统
+具备负载均衡能力，保证爬取过程高效且可靠。
+
+\subsection{数据查看}
+系统针对已成功爬取并存储的数据，设计了多层级数据浏览机制，方便用户直观地管理和使用数据：
+
+网站层级：展示所有爬取网站的基本信息，包括域名、最新爬取时间、总网页数等统计摘要，便于快速了解整体爬取概况。
+
+网页层级：点击具体网站后，展示其下所有网页的URL、标题、爬取时间以及内容摘要，支持分页与排序功能，方便用户定位感兴趣页面。
+
+内容层级：进一步进入网页，显示网页中提取的文本内容（支持纯文本和HTML两种视图切换）及图片缩略图，图片支持
+点击查看原图或下载。所有内容均可快速跳转至对应的原始网页，确保用户访问的便捷性和数据的可追溯性。
+
+\subsection{关键词检索}
+系统内置全文关键词检索引擎，支持基于网页内容自动提取的关键词进行查询。用户可输入关键词，检索结果以关键词命
+中上下文片段的形式呈现，方便用户快速定位相关内容。所有相关链接均支持一键跳转原网页。检索性能通过高效索引
+结构和缓存机制保障，确保响应速度和用户体验。
+
+\subsection{数据管理}
+为方便用户维护数据，系统采用树形结构对爬取数据进行管理。所有删除操作均需二次确认，防止误操作导致数据丢失。
+
+网站删除：彻底删除该网站下所有网页及其关联内容（文本、图片等）。
+
+网页删除：删除指定网页URL及其所有文本和图片数据。
+
+内容/图片删除：精细化删除选定的具体内容段或图片文件。
+同时，系统支持数据的批量导出、备份和恢复功能，方便用户进行离线分析及安全存档。
+
+\subsection{其他功能}
+
+数据看板：系统首页配备实时动态数据看板，展示爬取网站数量（区分活跃与失效状态）、网页总量、关键词统计、
+存储容量使用情况等指标，帮助用户直观了解数据变化和系统运行状况。
+
+开发者信息：页面底部固定显示开发者联系方式和社交媒体图标（GitHub、Bilibili等），用户点击即可跳转到相关主页，促进用户交流和反馈。
+
+帮助中心：内置详细的用户手册，包含操作流程、常见问题解答及截图指引，帮助用户快速解决使用中遇到的问题，提高整体服务体验。
+
+\section{模块划分}
+\subsection{数据爬取模块}
+该模块支持用户通过输入目标网站URL、设置爬取深度和间隔时间等参数来创建爬取任务。系统采用多线程异步架构实现高效爬取，能够自动处理网页编码识别、动态内容渲染等复杂场景。所有爬取结果会经过结构化处理后存入数据库，包括网页文本、图片等资源。
+
+\subsection{数据查看模块}
+该模块以层级化方式展示已爬取的数据内容，用户可以从网站域名开始逐级下钻查看具体网页及其包含的文本和图片资源，所有网页链接都支持一键跳转至源网站；同时支持将感兴趣的内容通过命令行导出。
+
+\subsection{关键词检索模块}
+该模块支持通过网页内容提取的关键词查询相关网站和网页。用户可输入单个或多个关键词进行匹配，检索结果展示命中关键词的上下文片段。所有结果中的链接均支持直接跳转。
+
+\subsection{数据删除模块}
+该模块采用树形结构管理数据，删除操作需二次确认。网站删除：移除该域名下所有网页及关联内容；网页删除：删除选定URL及其文本/图片数据；内容/图片删除：删除选定的内容段和图片。
+
+
+\section{系统实现}
+
+\subsection{开发环境与技术栈}
+本系统推荐在主流操作系统环境下进行开发和部署，具体包括Windows 10及以上版本，macOS以及各类Linux发行版，确保兼容性和稳定性。
+编程语言选用Python，推荐版本为3.11及以上，充分利用其最新特性和性能优化，同时享受丰富的第三方库支持。
+数据库方面，采用MySQL 8.0及以上版本，结合其强大的事务支持与高效的查询性能，为系统数据存储和管理提供可靠保障。
+
+系统依赖的主要Python包包括：
+\begin{itemize}
+    \item Django：作为核心Web框架，支持快速开发和部署。
+    \item mysqlclient（或备选pymysql）：用于与MySQL数据库的高效连接。
+    \item django-environ：简化环境变量配置，方便多环境管理。
+    \item urllib、requests：实现HTTP请求和网络资源访问。
+    \item beautifulsoup4：负责HTML解析，结构化提取网页内容。
+    \item url\_normalize：用于统一URL格式，避免因不同URL写法导致重复爬取。
+    \item jieba：轻量且高效的中文分词工具，支持后续关键词提取和搜索功能。
+\end{itemize}
+此外，开发环境建议配合使用虚拟环境（如venv或conda）管理依赖，保证环境整洁且易于迁移。
+
+\subsection{核心架构图}
+系统采用分层架构设计，如图\ref{fig:core_architecture}所示。整体架构由用户接口层、业务逻辑层、数据持久层及爬虫模块组成。
+
+用户接口层：基于Django提供的视图和模板，向用户展现交互界面，包含账号管理、任务管理、数据浏览等功能。
+
+业务逻辑层：实现爬取任务调度、数据处理、关键词检索及权限控制等核心功能，保证系统逻辑清晰且可维护。
+
+数据持久层：通过Django ORM与MySQL数据库交互，完成数据的存储、查询与更新。
+
+爬虫模块：负责网络爬取和数据解析，支持多线程和异常处理，保证爬取效率和数据完整性。
+
+该架构模块之间松耦合，便于后续功能扩展和性能优化。
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.8\textwidth]{core.png}
+\caption{核心架构图}\label{fig:core_architecture}
+\end{figure}
+
+\subsection{项目文件结构说明}
+
+本项目基于Django框架，采用典型的MVC（Model-View-Controller）设计模式，目录结构规范合理，便于代码管理与维护。各主要目录和文件说明如下：
+
+\begin{itemize}
+\item \textbf{mysite/}：项目主配置目录，包含核心配置文件 \texttt{settings.py}（负责全局配置如数据库、应用、日志等），主路由配置文件 \texttt{urls.py}（定义全局URL路由规则），以及环境变量配置文件 \texttt{.env}，便于实现配置与代码分离，支持多环境灵活切换。
+
+\item \textbf{crawls/}：爬虫核心应用模块，承担整个爬取系统的业务逻辑。
+其中，\texttt{models.py} 定义数据库数据模型，保证数据结构规范；
+\texttt{views.py} 负责实现前端页面的视图逻辑；
+\texttt{urls.py} 作为本模块的子路由配置文件，划分模块路由；
+\texttt{Crawler.py}、\texttt{Downloader.py} 与 \texttt{Saver.py} 三个文件分别负责爬虫核心爬取流程、页面下载和数据保存，实现职责清晰的模块化设计；
+\texttt{templates/} 文件夹包含HTML模板，\texttt{base.html}为主模板，定义页面的整体框架，具体页面继承并扩展于此，增强代码复用与统一风格。
+
+\item \textbf{static/}：静态资源存放目录，包括CSS样式文件（\texttt{css/}）和图片资源（\texttt{picture/}），支持前端界面美化和功能展示。
+
+\item \textbf{Explain.sql}：项目相关的SQL脚本和说明文档，包含数据库表结构创建语句、常用SQL操作示例及删除逻辑说明，有助于理解数据层设计及维护。
+
+\item \textbf{README.md}：项目使用说明文档，包含项目简介、安装配置步骤、功能介绍及运行指南，便于新用户快速上手。
+
+\item \textbf{manage.py}：Django项目的管理脚本，支持项目启动、数据库迁移、应用管理等多种命令操作，是项目运行和维护的入口工具。
+
+\end{itemize}
+
+整体项目结构遵循模块化设计原则，各部分职责分明，既保证了系统的可扩展性和易维护性，也便于团队协作开发，提升整体开发效率和项目质量。
+
+\subsection{技术选型}
+
+本系统各技术组件的选型基于项目需求、技术成熟度和社区支持度综合考虑，具体说明如下：
+
+\begin{description}
+  \item[Web框架 Django]  
+  Django框架自带强大的ORM支持和Admin后台管理，具备完善的生态系统和丰富的文档资源，适合快速构建数据驱动型Web应用。此外，Django内置多项安全机制，极大地降低了开发难度和安全风险。
+  
+  \item[数据库驱动 mysqlclient/pymysql]  
+  mysqlclient基于C语言接口，性能优越且稳定，是操作MySQL的主流驱动。pymysql则为纯Python实现，兼容性良好，作为备用方案保障系统的稳定性与灵活性。
+  
+  \item[网页解析BeautifulSoup4]
+  相较于正则表达式，BeautifulSoup4在HTML解析方面更加稳定和灵活，支持复杂的文档结构解析和元素定位，大幅简化爬取数据提取流程。
+  
+  \item[URL标准化url\_normalize]  
+  该库能有效统一URL格式，处理多余参数、大小写等细节，避免因格式差异导致重复爬取，提高爬虫的效率和准确性。
+  
+  \item[中文分词jieba]  
+  jieba是轻量级的开源中文分词工具，具备高效且准确的分词能力，适用于关键词提取和搜索索引构建，显著提升系统中文内容的检索效果。
+\end{description}
+
+
+\subsection{数据库实现与测试验证}
+数据库设计严格遵循规范化原则，涵盖网站、网页、内容、图片、数据源及爬取任务等多张表结构，支持
+数据完整性和高效查询。数据模型通过Django ORM实现，确保数据库操作的安全性和一致性。
+
+系统在开发阶段进行了全面的功能测试和压力测试，包括：
+\begin{itemize}
+    \item 数据库连接稳定性测试
+    \item 多线程爬取任务的调度与管理测试
+    \item 数据完整性与一致性验证
+    \item 关键词检索功能的准确性测试
+\end{itemize}
+
+\end{document}
